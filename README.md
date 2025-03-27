@@ -3,5 +3,5 @@ A demo project demonstrating how to use Swagger (based on OpenAPI 3.0 specificat
 
 Tech stack:
 - Maven
-- Java 17
-- Spring Boot 3.1
+- Java 21
+- Spring Boot
