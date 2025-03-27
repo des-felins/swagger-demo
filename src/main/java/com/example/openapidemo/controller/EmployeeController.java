@@ -1,5 +1,9 @@
-package com.example.openapidemo;
+package com.example.openapidemo.controller;
 
+import com.example.openapidemo.dto.EmployeeDto;
+import com.example.openapidemo.dto.NewEmployeeDto;
+import com.example.openapidemo.entity.Employee;
+import com.example.openapidemo.service.EmployeeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -7,50 +11,46 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 public class EmployeeController {
-    @Autowired
-    private EmployeeRepository repository;
 
-    public EmployeeController(EmployeeRepository repository) {
-        this.repository = repository;
+
+    private final EmployeeService employeeService;
+
+    public EmployeeController(EmployeeService service) {
+        this.employeeService = service;
     }
 
     @Tag(name = "get", description = "GET methods of Employee APIs")
     @GetMapping("/employees")
-    public List<Employee> findAllEmployees() {
-        return repository.findAll();
+    public List<EmployeeDto> findAllEmployees() {
+        return employeeService.findAll();
     }
 
     @Tag(name = "get", description = "Retrieve one employee")
     @GetMapping("/employees/{employeeId}")
-    public Employee getEmployee(@Parameter(
+    public EmployeeDto getEmployee(@Parameter(
             description = "ID of employee to be retrieved",
             required = true)
-                                @PathVariable int employeeId) {
-        Employee employee = repository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee id not found - " + employeeId));
-        return employee;
+                                   @PathVariable int employeeId) {
+
+        return employeeService.findById(employeeId);
     }
 
     @PostMapping("/employees")
-    public Employee addEmployee(@RequestBody Employee employee) {
-        employee.setId(0);
-        Employee newEmployee = repository.save(employee);
-        return newEmployee;
+    public EmployeeDto addEmployee(@RequestBody NewEmployeeDto employee) {
+        return employeeService.save(employee);
     }
 
     @Operation(summary = "Update an employee",
             description = "Update an existing employee. The response is updated Employee object with id, first name, and last name.")
     @PutMapping("/employees")
-    public Employee updateEmployee(@RequestBody Employee employee) {
-        Employee theEmployee = repository.save(employee);
-        return theEmployee;
+    public EmployeeDto updateEmployee(@RequestBody EmployeeDto employee) {
+        return employeeService.update(employee);
     }
 
 
@@ -61,9 +61,7 @@ public class EmployeeController {
                     content = @Content)})
     @DeleteMapping("/employees/{employeeId}")
     public String deleteEmployee(@PathVariable int employeeId) {
-        Employee employee = repository.findById(employeeId)
-                .orElseThrow(() -> new RuntimeException("Employee id not found - " + employeeId));
-        repository.delete(employee);
+        employeeService.deleteById(employeeId);
         return "Deleted employee with id: " + employeeId;
     }
 
